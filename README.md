@@ -320,5 +320,3 @@ Ou, dependendo do caso, usando `NOT IN`.
 139. Monte uma consulta que mostre o total pago e o total pendente por venda.
 
 140. Monte uma consulta que mostre o saldo restante de cada venda, considerando pagamentos parciais.
-
-Minha sugestão: faça primeiro as questões 1 a 30 sem consultar resposta. Depois passe para 31 a 60. As de 100 para frente já são nível mais próximo de sistema real/prova prática.
