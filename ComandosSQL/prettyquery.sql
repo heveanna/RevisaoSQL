@@ -152,14 +152,39 @@ SELECT	ra.Nome AS 'Raça',
 -- 23. Liste todos os animais com seus respectivos donos, mesmo que algum dado relacionado esteja incompleto.
 
 SELECT	an.Nome AS 'Animal', 
+		cl.Nome AS 'Cliente'
+	FROM Animal as an 
+		LEFT JOIN Cliente as cl
+			ON an.IdCliente = cl.Id
 
 -- 24. Liste todos os clientes e seus animais, incluindo clientes que ainda não têm animal cadastrado.
 
+SELECT	cl.Nome AS 'Cliente',
+		an.Nome AS 'Animal'
+	FROM Cliente as cl
+		JOIN Animal as an 
+			ON an.Id = cl.Id
+
 -- 25. Liste os produtos junto com suas categorias.
+
+SELECT	pr.Nome AS 'Produto',
+		cp.Nome AS 'Categoria'
+	FROM Produto as pr
+		JOIN CategoriaProduto as cp
+		ON cp.Id = pr.IdCategoriaProduto;
 
 -- 26. Liste as vendas junto com o nome do cliente que realizou a compra.
 
+SELECT	FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS 'Valor',
+		cl.Nome AS 'Cliente',
+		ve.DataHora AS 'Data'
+	FROM Venda as ve
+		JOIN Cliente as cl
+			ON cl.Id = ve.IdCliente;
+		
 -- 27. Liste os pagamentos junto com a venda correspondente e o tipo de pagamento usado.
+
+SELECT 
 
 -- 28. Liste os produtos vendidos em cada venda.
 
