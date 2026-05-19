@@ -184,14 +184,46 @@ SELECT	FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS 'Valor',
 		
 -- 27. Liste os pagamentos junto com a venda correspondente e o tipo de pagamento usado.
 
-SELECT 
+SELECT  ve.Id,
+		tp.Nome AS 'Tipo Pagamento',
+        FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS Valor,
+        ve.StatusVenda AS Pagamento
+    FROM [dbo].[Pagamento] as pa
+        JOIN [dbo].[TipoPagamento] as tp
+            ON pa.IdTipoPagamento = tp.Id
+        JOIN [dbo].[Venda] as ve
+            ON pa.IdVenda = ve.Id
+	WHERE ve.StatusVenda LIKE 'Paga';
 
 -- 28. Liste os produtos vendidos em cada venda.
 
+SELECT	pr.Nome AS Produto,
+		ve.StatusVenda AS 'Produtos Vendidos'
+	FROM [dbo].[Produto] as pr
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = pr.Id
+	WHERE ve.StatusVenda LIKE 'Paga';
+		
 -- 29. Liste o nome do produto, quantidade vendida e valor unitário em cada item de venda.
+
+SELECT	pr.Nome AS Produto,
+		COUNT(ve.StatusVenda) AS 'Qtd. Vendida',
+		pr.Preco AS 'Valor Unitário'
+	FROM [dbo].[Produto] as pr 
+		JOIN [dbo].[Venda] as ve
+			ON  ve.Id = pr.Id
+	GROUP BY ve.StatusVenda, pr.Nome, pr.Preco;
 
 -- 30. Liste os serviços vendidos em cada venda.
 
+SELECT	ve.Id,
+		ti.Nome AS 'Serviço Vendidos',
+		ve.ValorTotal AS Venda,
+		ve.StatusVenda AS Status 
+	FROM [dbo].[Venda] as ve
+		JOIN [dbo].[TipoServico] as ti
+			ON ti.Id = ve.Id;
+		
 -- 31. Liste o nome do serviço, nome do cliente e data da venda.
 
 -- 32. Liste os agendamentos com o nome do cliente, nome do animal e nome do funcionário responsável.
