@@ -101,3 +101,74 @@ SELECT *
 	FROM [dbo].[Produto]
 	WHERE Id = 1;
 GO
+
+-- 6. Procedure com JOIN
+
+CREATE PROC ListarAgendamentosDetalhados
+	AS
+		BEGIN
+
+			SELECT	cl.Nome as Cliente,
+					an.Nome as Animal,
+					fu.Nome as Funcionario,
+					ti.Nome as Tipo,
+					ag.DataHoraAgendado,
+					ag.DataHoraRealizado
+				FROM [dbo].[Agendamento] as ag WITH(NOLOCK)
+					JOIN [dbo].[Animal] as an WITH(NOLOCK)
+						ON ag.IdAnimal = an.Id
+						JOIN [dbo].[Cliente] as cl WITH(NOLOCK)
+							ON an.IdCliente = cl.Id
+					JOIN [dbo].[Funcionario] as fu WITH(NOLOCK)
+						ON ag.IdFuncionario = fu.Id
+					JOIN [dbo].[TipoServico] as ti WITH(NOLOCK)
+						On ag.IdTipoServico = ti.Id
+				ORDER BY cl.Nome;
+
+		END
+GO
+
+EXEC ListarAgendamentosDetalhados;
+GO
+
+-- 7. Procedure com totalização
+
+CREATE PROC TotalVendasCliente
+	@IdCliente int
+	AS
+		BEGIN
+
+			IF EXISTS	(	
+							SELECT	1
+								FROM [dbo].[Cliente] WITH(NOLOCK)
+								WHERE Id = @IdCliente
+						)
+				BEGIN
+
+					SELECT	cl.Nome as Cliente,
+							COUNT(ve.Id) as QuantidadeDeVendas,
+							SUM(ve.ValorTotal) as ValorTotalGasto
+						FROM [dbo].[Cliente] AS cl WITH(NOLOCK)
+							JOIN [dbo].[Venda] as ve WITH(NOLOCK)
+								ON cl.Id = ve.IdCliente
+						WHERE cl.Id = @IdCliente
+						GROUP BY cl.Nome;
+
+				END
+
+			ELSE
+				BEGIN
+
+					PRINT 'Cliente não encontrado'
+
+				END
+
+		END
+GO
+
+EXEC TotalVendasCliente 1;
+GO
+
+INSERT INTO [dbo].[Venda] (IdCliente, IdFuncionario, StatusVenda, ValorTotal, DataHora)
+	VALUES (1, 3, 'Banana', 100000, GETDATE());
+
