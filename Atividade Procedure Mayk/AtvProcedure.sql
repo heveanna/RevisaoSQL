@@ -259,3 +259,47 @@ EXEC sp_RegistrarVendaCompleta
 
 
 -- 10. Procedure avançada (nível legal mesmo)
+
+CREATE PROCEDURE sp_RelatorioClienteCompleto	(
+													@IdCliente INT
+												)
+
+	AS 
+	BEGIN
+
+		SELECT	c.Nome,
+				c.Cpf,
+				a.Nome as NomeAnimal,
+				r.Nome as Raça,
+				es.Nome as Especie,
+				hv.NomeVacina,
+				hv.DataAplicacao,
+				hv.ProximaDose,
+				v.DataHora,
+				v.ValorTotal,
+				tp.Nome,
+				ag.DataHoraAgendado,
+				ag.DataHoraRealizado
+
+			FROM Animal AS a
+				JOIN Raca as r
+					ON r.Id = a.IdRaca
+				JOIN Especie as es
+					ON es.Id = r.IdEspecie
+				JOIN Cliente as c
+					ON c.Id = a.IdCliente
+				JOIN HistoricoVacina as hv
+					ON a.Id = hv.IdAnimal
+				JOIN Venda as v
+					ON c.Id = v.IdCliente
+				JOIN Agendamento as ag
+					ON a.Id = ag.IdAnimal
+				JOIN TipoServico as tp
+					ON tp.Id = ag.IdTipoServico
+			WHERE c.Id = @IdCliente
+
+	END;
+
+EXEC sp_RelatorioClienteCompleto @IdCliente = 140
+
+
