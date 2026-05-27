@@ -320,3 +320,84 @@ Ou, dependendo do caso, usando `NOT IN`.
 139. Monte uma consulta que mostre o total pago e o total pendente por venda.
 
 140. Monte uma consulta que mostre o saldo restante de cada venda, considerando pagamentos parciais.
+
+--------------------------------------------
+
+1. Liste o nome do cliente, o nome do animal e a data do agendamento.
+   Mostre apenas agendamentos que realmente possuem cliente e animal cadastrados.
+
+2. Liste todos os clientes e, caso tenham animais cadastrados, mostre o nome dos animais.
+   Clientes sem animais também devem aparecer.
+
+3. Mostre todos os produtos e o nome da categoria de cada um.
+   Produtos sem categoria não devem aparecer.
+
+4. Liste todos os funcionários e os serviços que eles podem realizar.
+   Funcionários sem especialidade também devem aparecer.
+
+5. Mostre todas as vendas com:
+
+* nome do cliente
+* nome do funcionário
+* data da venda
+* valor total
+
+Considere que toda venda obrigatoriamente possui cliente e funcionário.
+
+6. Liste todos os animais e suas alergias.
+   Animais sem alergia também devem aparecer.
+
+7. Mostre os produtos vendidos em cada venda, incluindo:
+
+* ID da venda
+* nome do produto
+* quantidade
+
+Considere apenas vendas que realmente possuem produtos vinculados.
+
+8. Liste todos os tipos de serviço e os agendamentos relacionados.
+   Tipos de serviço sem agendamento também devem aparecer.
+
+9. Mostre:
+
+* nome do animal
+* espécie
+* raça
+
+Mas exiba também animais que ainda não possuem raça cadastrada.
+
+10. Liste todos os fornecedores e os produtos fornecidos por eles.
+    Fornecedores sem produtos também devem aparecer.
+
+11. Mostre todos os pagamentos realizados com:
+
+* ID da venda
+* tipo de pagamento
+* valor pago
+
+Considere apenas pagamentos válidos com tipo de pagamento existente.
+
+12. Liste todos os clientes e as vendas realizadas por eles.
+    Clientes que nunca compraram também devem aparecer.
+
+13. Mostre:
+
+* nome do produto
+* preço atual
+* preço anterior do histórico
+
+Produtos sem histórico de preço também devem aparecer.
+
+14. Liste os funcionários e os agendamentos que eles atenderam.
+    Funcionários sem agendamentos também devem aparecer.
+
+15. Gere uma consulta mostrando:
+
+* nome do cliente
+* nome do animal
+* nome do serviço realizado
+* funcionário responsável
+* data do agendamento
+
+Mas exiba apenas registros totalmente relacionados entre si, sem valores nulos nas entidades principais.
+
