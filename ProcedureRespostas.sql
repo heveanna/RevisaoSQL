@@ -11,9 +11,10 @@ CREATE PROCEDURE ListarClientes
 				cl.DataCadastro,
 				cl.Telefone,
 				cl.Email
-			FROM dbo.Cliente as cl
+			FROM dbo.Cliente as cl WITH(NOLOCK)
 			ORDER BY cl.Nome;
 GO
+
 
 EXEC ListarClientes;
 GO
@@ -29,7 +30,7 @@ CREATE PROCEDURE BuscarAnimalPorCliente
 				ra.Nome as Raca,
 				an.Peso,
 				an.Sexo
-			FROM dbo.Animal as an
+			FROM dbo.Animal as an WITH(NOLOCK)
 				JOIN [dbo].[Raca] as ra
 					ON an.IdRaca = ra.Id
 			WHERE an.IdCliente = @IdCliente
@@ -79,7 +80,11 @@ CREATE PROC AtualizarPrecoProduto
 	@IdProduto INT,
 	@Preco DECIMAL(10, 2)
 	AS
-		IF EXISTS (SELECT 1 FROM [dbo].[Produto] WHERE Id = @IdProduto)
+		IF EXISTS	(	
+						SELECT 1 
+							FROM [dbo].[Produto] WITH(NOLOCK)
+							WHERE Id = @IdProduto
+					)
 			BEGIN
 				UPDATE [dbo].[Produto]
 					SET Preco = @Preco
@@ -98,7 +103,7 @@ EXEC AtualizarPrecoProduto 1, 20;
 GO
 
 SELECT *
-	FROM [dbo].[Produto]
+	FROM [dbo].[Produto] WITH(NOLOCK)
 	WHERE Id = 1;
 GO
 
@@ -139,9 +144,9 @@ CREATE PROC TotalVendasCliente
 		BEGIN
 
 			IF EXISTS	(	
-							SELECT	1
-								FROM [dbo].[Cliente] WITH(NOLOCK)
-								WHERE Id = @IdCliente
+						SELECT	1
+							FROM [dbo].[Cliente] WITH(NOLOCK)
+							WHERE Id = @IdCliente
 						)
 				BEGIN
 
@@ -171,6 +176,87 @@ GO
 
 INSERT INTO [dbo].[Venda] (IdCliente, IdFuncionario, StatusVenda, ValorTotal, DataHora)
 	VALUES (1, 3, 'Banana', 100000, GETDATE());
+GO
 
 
--- 8. Procedure com transação
+-- 8. Procedure com transação && 9. Procedure com tratamento de erro
+
+CREATE PROC RegistrarVendaCompleta
+	@IdCliente INT,
+	@IdFuncionario INT,
+	@IdProduto INT,
+	@Quantidade INT
+	AS
+		BEGIN
+			BEGIN TRY
+				BEGIN TRANSACTION
+					DECLARE @IdVendaGerada INT;
+					DECLARE @PrecoUnitarioProduto DECIMAL(10, 2) = (
+																			SELECT	Preco
+																				FROM [dbo].[Produto]
+																				WHERE Id = @IdProduto
+																		);
+					DECLARE @ValorTotal DECIMAL(10, 2) = @Quantidade * @PrecoUnitarioProduto;
+									
+					INSERT INTO [dbo].[Venda] (IdCliente, IdFuncionario, StatusVenda, ValorTotal, DataHora)
+						VALUES (@IdCliente, @IdFuncionario, 'Pendente', @ValorTotal, GETDATE());
+
+					SET @IdVendaGerada = SCOPE_IDENTITY();
+
+					INSERT INTO [dbo].[VendaProduto] (IdProduto, IdVenda, PrecoUnitario, Quantidade)
+						VALUES (@IdProduto, @IdVendaGerada, @PrecoUnitarioProduto, @Quantidade);
+
+					COMMIT
+				END TRY
+
+				BEGIN CATCH
+					PRINT 'Falha no cadastro';
+					ROLLBACK
+				END CATCH
+		END
+
+EXEC RegistrarVendaCompleta 982462831, 1, 1, 6;
+
+SELECT TOP 1 * FROM Venda ORDER BY Id DESC
+GO
+
+-- 10. Procedure avançada (nível legal mesmo)
+
+CREATE PROC RelatorioClienteCompleto
+	@IdCliente INT
+	AS
+		BEGIN
+			SELECT	cl.Nome as Cliente,
+					cl.Cpf,
+					an.Nome as Animal,
+					ra.Nome as Raca,
+					es.Nome as Especie,
+					hv.NomeVacina,
+					hv.DataAplicacao,
+					hv.ProximaDose,
+					ve.DataHora,
+					ve.ValorTotal,
+					ts.Nome as TipoServico,
+					fu.Nome as Funcionario,
+					ve.DataHora
+				FROM [dbo].[Cliente] as cl
+					JOIN [dbo].[Animal] as an
+						ON cl.Id = an.IdCliente
+						JOIN [dbo].[HistoricoVacina] hv
+							ON an.Id = hv.IdAnimal
+						JOIN [dbo].[Agendamento] as ag
+							ON an.Id = ag.IdAnimal
+							JOIN [dbo].[Funcionario] as fu
+								ON ag.IdFuncionario = fu.Id
+							JOIN [dbo].[TipoServico] as ts
+								ON ag.IdTipoServico = ts.Id
+						JOIN [dbo].[Raca] as ra
+							ON an.IdRaca = ra.Id
+							JOIN [dbo].[Especie] as es
+								ON ra.IdEspecie = es.Id
+					JOIN [dbo].[Venda] as ve
+						ON cl.Id = ve.IdCliente
+				WHERE cl.Id = @IdCliente;
+		END
+
+EXEC RelatorioClienteCompleto 1;
