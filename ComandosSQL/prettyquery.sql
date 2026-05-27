@@ -226,13 +226,63 @@ SELECT	ve.Id,
 		
 -- 31. Liste o nome do serviço, nome do cliente e data da venda.
 
+SELECT	ts.Nome AS Servico,
+		cl.Nome AS Cliente, 
+		ve.DataHora AS 'Data da Venda'
+	FROM [dbo].[Cliente] as cl
+		JOIN [dbo].[TipoServico] as ts
+			ON ts.Id = cl.Id
+		JOIN [dbo].[Venda] as ve
+			ON ve.IdCliente = cl.Id;
+	
 -- 32. Liste os agendamentos com o nome do cliente, nome do animal e nome do funcionário responsável.
 
--- 33. Liste os funcionários e suas especialidades.
+SELECT	cl.Nome AS Cliente,
+		an.Nome AS Animal,
+		fu.Nome AS Funcionario,
+		ag.StatusAgendamento AS Agendamentos
+	FROM [dbo].[Agendamento] as ag WITH(NOLOCK)
+		JOIN [dbo].[Animal] as an
+			ON an.Id = ag.IdAnimal
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = ag.Id
+		JOIN [dbo].[Funcionario] as fu
+			ON fu.Id = ag.IdFuncionario
+	WHERE ag.StatusAgendamento LIKE 'Concluido';
+
+-- 33. Liste os funcionários e suas especialidades. 
+
+SELECT	fu.Nome AS Funcionario,
+		fu.Cargo AS Cargo 
+	FROM [dbo].[Funcionario] as fu
+
 
 -- 34. Liste todos os funcionários, mesmo os que ainda não possuem especialidade cadastrada.
 
+SELECT  fu.Nome AS Funcionario,
+		ts.Nome AS Especialidade
+	FROM [dbo].[Funcionario] as fu
+		LEFT JOIN [dbo].[FuncionarioEspecialidade] as fe
+			ON fe.IdFuncionario = fu.Id
+		LEFT JOIN [dbo].[TipoServico] as ts
+			ON ts.Id = fe.IdTipoServico	
+
+-- cadastrando mais um funcioanrio para teste
+INSERT INTO	Funcionario (Nome, Cpf, Cargo, Salario, Ativo )
+VALUES	('Joana Ricarda', '10000000031', 'Tosador',  2700, 1)
+
 -- 35. Liste todos os tipos de serviço e os funcionários especializados neles.
+
+SELECT  fu.Nome AS Funcinario,
+		ts.Nome AS Especialidade
+	FROM [dbo].[FuncionarioEspecialidade] as fe
+		JOIN [dbo].[Funcionario] as fu
+			ON fu.Id = fe.IdFuncionario
+		JOIN [dbo].[TipoServico] as ts
+			ON ts.Id = fe.IdTipoServico;
+
+SELECT * FROM TipoServico;
+SELECT * FROM Funcionario;
 
 -- 36. Liste os produtos e seus fornecedores.
 
@@ -244,7 +294,7 @@ SELECT	ve.Id,
 
 -- 40. Liste as alergias de cada animal com o nome do animal e do dono.
 
--- ## 3. JOINs com filtros
+-- 3. JOINs com filtros
 -- 41. Liste os animais da espécie `"Cachorro"`.
 
 -- 42. Liste os animais da raça `"Poodle"`.
