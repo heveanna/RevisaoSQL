@@ -172,3 +172,5 @@ GO
 INSERT INTO [dbo].[Venda] (IdCliente, IdFuncionario, StatusVenda, ValorTotal, DataHora)
 	VALUES (1, 3, 'Banana', 100000, GETDATE());
 
+
+-- 8. Procedure com transação
