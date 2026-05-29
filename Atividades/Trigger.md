@@ -1,331 +1,160 @@
-# Atividade Prática: TRIGGERS em SQL Server - 15 Questões
+---
 
-Baseado no banco de dados da clínica veterinária, aqui estão 15 questões sobre TRIGGERS, do nível básico ao avançado:
+## 20 Questões de DML Triggers — SQL Server
 
-## **NÍVEL BÁSICO (1-5)**
-
-### 1. Trigger INSERT Simples
-Crie um trigger que atualize um campo `DataUltimaModificacao` sempre que um novo Cliente for inserido:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Criar trigger básico de INSERT com UPDATE
+### AFTER Triggers — Nível básico
 
 ---
 
-### 2. Trigger de Validação
-Desenvolva um trigger que valide se o preço do Produto é maior que zero antes de inserir:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Usar RAISERROR em trigger
+**Questão 1 — AFTER INSERT**
+> Recurso: `inserted`, `GETDATE()`
+
+Crie uma tabela `LogVenda` com as colunas `Id`, `IdVenda`, `DataRegistro` e `Mensagem`. Em seguida, crie um trigger `AFTER INSERT` na tabela `Venda` que insira automaticamente um registro em `LogVenda` sempre que uma nova venda for cadastrada, registrando o id da venda, a data/hora atual e a mensagem `'Nova venda registrada'`.
 
 ---
 
-### 3. Trigger DELETE com Controle
-Crie um trigger que registre o ID de um Cliente deletado em uma tabela de auditoria:
-```sql
--- Sua resposta aqui
--- (Crie a tabela AuditoriaCliente também)
-```
-**Objetivo**: Trigger DELETE com inserção em tabela de auditoria
+**Questão 2 — AFTER DELETE**
+> Recurso: `deleted`
+
+Crie uma tabela `LogExclusao` com as colunas `Id`, `IdCliente`, `NomeCliente` e `DataExclusao`. Crie um trigger `AFTER DELETE` na tabela `Cliente` que registre nessa tabela os dados do cliente excluído, usando os valores disponíveis na tabela virtual `deleted`.
 
 ---
 
-### 4. Trigger UPDATE Simples
-Desenvolva um trigger que atualize `DataUltimaModificacao` do Animal sempre que seus dados forem alterados:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Trigger UPDATE automático
+**Questão 3 — AFTER UPDATE**
+> Recurso: `inserted`, `deleted`
+
+Crie um trigger `AFTER UPDATE` na tabela `Produto` que, sempre que o campo `Preco` for atualizado, insira um registro na tabela `HistoricoPreco` com o `IdProduto`, o `PrecoAnterior` (via `deleted`) e o `PrecoNovo` (via `inserted`).
 
 ---
 
-### 5. Trigger com GETDATE()
-Crie um trigger que registre a data e hora quando um Agendamento é cancelado (UPDATE status):
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Usar GETDATE() em trigger
+**Questão 4 — AFTER INSERT com auditoria de usuário**
+> Recurso: `inserted`, `SYSTEM_USER`, `HOST_NAME()`
+
+Crie uma tabela `AuditoriaCliente` com as colunas `Id`, `IdCliente`, `UsuarioSistema`, `Maquina` e `DataAcao`. Crie um trigger `AFTER INSERT` na tabela `Cliente` que registre nessa tabela quem inseriu o cliente, em qual máquina e quando, usando as funções `SYSTEM_USER` e `HOST_NAME()`.
 
 ---
 
-## **NÍVEL INTERMEDIÁRIO (6-10)**
+**Questão 5 — AFTER DELETE com contagem de linhas**
+> Recurso: `deleted`, `@@ROWCOUNT`
 
-### 6. Trigger com INSERTED e DELETED
-Desenvolva um trigger que compare o preço antigo e novo do Produto e registre a mudança numa tabela de histórico:
-```sql
--- Sua resposta aqui
--- (Crie a tabela HistoricoPrecoProduto também)
-```
-**Objetivo**: Usar tabelas INSERTED e DELETED
+Crie um trigger `AFTER DELETE` na tabela `VendaProduto` que, ao ser disparado, registre em uma tabela de log quantas linhas foram excluídas na operação, usando `@@ROWCOUNT`. A mensagem gravada deve conter o texto `'X linha(s) removidas de VendaProduto'`.
 
 ---
 
-### 7. Trigger com Múltiplas Ações
-Crie um trigger INSTEAD OF que ao inserir Venda, automaticamente crie um Agendamento correspondente:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: INSTEAD OF trigger com múltiplas operações
+### AFTER Triggers — Nível básico-intermediário
 
 ---
 
-### 8. Trigger Recursivo com Controle
-Desenvolva um trigger que ao inserir uma Venda, atualize a quantidade em estoque do Produto (se existir tabela de estoque):
-```sql
--- Sua resposta aqui
--- (Crie a tabela Estoque se necessário)
-```
-**Objetivo**: Trigger que causa cascata de updates
+**Questão 6 — AFTER INSERT com validação e ROLLBACK**
+> Recurso: `inserted`, `ROLLBACK TRANSACTION`, `RAISERROR`
+
+Crie um trigger `AFTER INSERT` na tabela `AnimalAlergia` que verifique se o `IdAnimal` informado existe na tabela `Animal`. Caso não exista, o trigger deve desfazer a operação com `ROLLBACK TRANSACTION` e informar o erro com `RAISERROR('Animal não encontrado', 16, 1)`.
 
 ---
 
-### 9. Trigger com Condição IF
-Crie um trigger que só registre a auditoria se o valor da Venda for maior que R$ 100:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Trigger com lógica condicional
+**Questão 7 — AFTER UPDATE bloqueando campo protegido**
+> Recurso: `inserted`, `deleted`, `UPDATE(coluna)`, `THROW`
+
+Crie um trigger `AFTER UPDATE` na tabela `Funcionario` que impeça a alteração do campo `Cpf`. Use a função `UPDATE(Cpf)` para detectar se a coluna foi incluída no `SET`. Se sim, execute `ROLLBACK` e lance o erro com `THROW 50001, 'Não é permitido alterar o CPF de um funcionário', 1`.
 
 ---
 
-### 10. Trigger para Atualizar Agregados
-Desenvolva um trigger que ao inserir uma Venda, atualize um campo de TotalGasto na tabela Cliente:
-```sql
--- Sua resposta aqui
--- (Adicione campo TotalGasto em Cliente se necessário)
-```
-**Objetivo**: Manter agregados atualizados via trigger
+**Questão 8 — AFTER DELETE em cascata controlada**
+> Recurso: `deleted`, `ROWCOUNT`, `ROLLBACK TRANSACTION`
+
+Crie um trigger `AFTER DELETE` na tabela `Animal` que exclua automaticamente todos os registros relacionados nas tabelas `AnimalAlergia`, `HistoricoVacina` e `VendaServico` usando o `IdAnimal` presente em `deleted`. Registre em log quantas linhas foram removidas em cada tabela.
 
 ---
 
-## **NÍVEL AVANÇADO (11-15)**
+**Questão 9 — AFTER UPDATE com lógica condicional por coluna**
+> Recurso: `inserted`, `deleted`, `UPDATE(coluna)`, `IF`
 
-### 11. Trigger com FOR EACH ROW (Múltiplas Linhas)
-Crie um trigger que para cada linha inserida em VendaProduto, registre em uma tabela de log incluindo usuário:
-```sql
--- Sua resposta aqui
--- (Use SYSTEM_USER para obter o usuário)
-```
-**Objetivo**: Processar múltiplas linhas em um trigger
+Crie um trigger `AFTER UPDATE` na tabela `Funcionario` que só execute alguma ação caso a coluna `Salario` tenha sido alterada. Se o novo salário (em `inserted`) for inferior ao salário anterior (em `deleted`), registre um aviso em uma tabela de log com a mensagem `'Redução salarial detectada'`.
 
 ---
 
-### 12. Trigger com CURSOR
-Desenvolva um trigger que ao deletar um Cliente, delete em cascata todos seus Animais, Agendamentos e Vendas:
-```sql
--- Sua resposta aqui
-```
-**Objetivo**: Usar CURSOR em trigger para exclusões em cascata
+**Questão 10 — AFTER INSERT evitando recursão**
+> Recurso: `TRIGGER_NESTLEVEL()`, `inserted`
+
+Crie um trigger `AFTER INSERT` na tabela `HistoricoPreco` que registre a inserção em uma tabela de auditoria geral. Use `TRIGGER_NESTLEVEL()` para garantir que o trigger não entre em loop caso a própria tabela de auditoria também possua triggers ativos.
 
 ---
 
-### 13. Trigger com Validação Complexa
-Crie um trigger que valide se um Agendamento não se sobrepõe com outro do mesmo funcionário (validação de conflito de horário):
-```sql
--- Sua resposta aqui
--- (Assuma que Agendamento tem DataAgendada e HoraInicio)
-```
-**Objetivo**: Validação complexa com SELECT em trigger
+### INSTEAD OF Triggers — Nível básico-intermediário
 
 ---
 
-### 14. Trigger AFTER e INSTEAD OF Combinados
-Desenvolva um trigger INSTEAD OF INSERT em Venda que faça validações complexas e registre quem inseriu com data/hora:
-```sql
--- Sua resposta aqui
--- (Crie a tabela AuditoriaVenda para registros)
-```
-**Objetivo**: Combinar verificações com registro de auditoria completo
+**Questão 11 — INSTEAD OF INSERT em view simples**
+> Recurso: `inserted`, `INSTEAD OF`
+
+Crie uma view `vw_ProdutoFornecedor` que una as tabelas `Produto` e `Fornecedor` exibindo `NomeProduto`, `NomeFornecedor` e `Preco`. Em seguida, crie um trigger `INSTEAD OF INSERT` nessa view que redirecione a inserção para a tabela `Produto`, preenchendo os campos corretos com os dados recebidos via `inserted`.
 
 ---
 
-### 15. Trigger com Tratamento de Erro
-Crie um trigger que ao inserir um Agendamento tente atualizar dados relacionados e, em caso de erro, registre o erro em uma tabela de erros sem interromper a operação:
-```sql
--- Sua resposta aqui
--- (Crie a tabela LogErrosTrigger)
-```
-**Objetivo**: Error handling robusto em triggers com TRY/CATCH
+**Questão 12 — INSTEAD OF DELETE em view**
+> Recurso: `deleted`, `INSTEAD OF`
+
+Crie uma view `vw_ClienteAnimal` que una `Cliente` e `Animal`. Implemente um trigger `INSTEAD OF DELETE` nessa view que, ao receber um comando de exclusão, exclua apenas o animal correspondente da tabela `Animal`, sem excluir o cliente, usando os dados de `deleted`.
 
 ---
 
-## **ESTRUTURA BÁSICA DE TRIGGERS**
+**Questão 13 — INSTEAD OF UPDATE redirecionando para duas tabelas**
+> Recurso: `inserted`, `deleted`, `INSTEAD OF`
 
-Para ajudar você a começar:
-
-```sql
--- Sintaxe básica de um trigger em SQL Server
-CREATE TRIGGER NomeTrigger
-ON NomeTabela
-AFTER/INSTEAD OF INSERT/UPDATE/DELETE
-AS
-BEGIN
-    -- Seu código aqui
-    -- Acesso a dados inseridos/atualizados via INSERTED
-    -- Acesso a dados deletados via DELETED
-END
-```
+Crie uma view `vw_VendaCliente` que exiba `IdVenda`, `NomeCliente` e `ValorTotal`. Crie um trigger `INSTEAD OF UPDATE` que, ao receber um UPDATE nessa view, atualize o `ValorTotal` na tabela `Venda` e o `Nome` na tabela `Cliente` separadamente, usando os valores de `inserted` para os novos dados.
 
 ---
 
-## **GABARITO BÁSICO** (Exemplos de Soluções)
-
-<details>
-<summary>Ver Gabarito - Questão 1</summary>
-
-```sql
-CREATE TRIGGER trg_ClienteInserido
-ON Cliente
-AFTER INSERT
-AS
-BEGIN
-    UPDATE Cliente
-    SET DataUltimaModificacao = GETDATE()
-    WHERE id IN (SELECT id FROM INSERTED)
-END
-```
-
-</details>
-
-<details>
-<summary>Ver Gabarito - Questão 2</summary>
-
-```sql
-CREATE TRIGGER trg_ValidarPrecoProduto
-ON Produto
-AFTER INSERT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 FROM INSERTED WHERE Preco <= 0)
-    BEGIN
-        RAISERROR('Preço do produto deve ser maior que zero', 16, 1)
-        ROLLBACK TRANSACTION
-    END
-END
-```
-
-</details>
-
-<details>
-<summary>Ver Gabarito - Questão 3</summary>
-
-```sql
--- Criar tabela de auditoria
-CREATE TABLE AuditoriaCliente (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    ClienteID INT,
-    Acao VARCHAR(50),
-    DataAcao DATETIME DEFAULT GETDATE()
-)
-
--- Criar trigger
-CREATE TRIGGER trg_ClienteDeletado
-ON Cliente
-AFTER DELETE
-AS
-BEGIN
-    INSERT INTO AuditoriaCliente (ClienteID, Acao)
-    SELECT id, 'DELETADO' FROM DELETED
-END
-```
-
-</details>
-
-<details>
-<summary>Ver Gabarito - Questão 6</summary>
-
-```sql
-CREATE TABLE HistoricoPrecoProduto (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    ProdutoID INT,
-    PrecoAntigo DECIMAL(10,2),
-    PrecoNovo DECIMAL(10,2),
-    DataMudanca DATETIME DEFAULT GETDATE()
-)
-
-CREATE TRIGGER trg_HistoricoPrecoProduto
-ON Produto
-AFTER UPDATE
-AS
-BEGIN
-    INSERT INTO HistoricoPrecoProduto (ProdutoID, PrecoAntigo, PrecoNovo)
-    SELECT 
-        d.id,
-        d.Preco,
-        i.Preco
-    FROM DELETED d
-    INNER JOIN INSERTED i ON d.id = i.id
-    WHERE d.Preco != i.Preco
-END
-```
-
-</details>
-
-<details>
-<summary>Ver Gabarito - Questão 10</summary>
-
-```sql
--- Adicionar coluna se não existir
-ALTER TABLE Cliente
-ADD TotalGasto DECIMAL(12,2) DEFAULT 0
-
--- Criar trigger
-CREATE TRIGGER trg_AtualizarTotalGastoCliente
-ON Venda
-AFTER INSERT
-AS
-BEGIN
-    UPDATE Cliente
-    SET TotalGasto = TotalGasto + i.Valor
-    FROM INSERTED i
-    WHERE Cliente.id = i.idCliente
-END
-```
-
-</details>
-
-<details>
-<summary>Ver Gabarito - Questão 13</summary>
-
-```sql
-CREATE TRIGGER trg_ValidarConflutoAgendamento
-ON Agendamento
-AFTER INSERT
-AS
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Agendamento a
-        INNER JOIN INSERTED i ON a.idFuncionario = i.idFuncionario
-        WHERE a.DataAgendada = i.DataAgendada
-        AND a.id != i.id
-    )
-    BEGIN
-        RAISERROR('Conflito de horário: funcionário já possui agendamento neste horário', 16, 1)
-        ROLLBACK TRANSACTION
-    END
-END
-```
-
-</details>
+### Nível intermediário
 
 ---
 
-## **DICAS IMPORTANTES**
+**Questão 14 — AFTER INSERT com verificação de duplicidade**
+> Recurso: `inserted`, `IF EXISTS`, `ROLLBACK TRANSACTION`, `THROW`
 
-✅ **Boas Práticas:**
-- Sempre use `BEGIN...END` para agrupar múltiplas instruções
-- Use `RAISERROR` para validações (com ROLLBACK se necessário)
-- Lembre-se de `GETDATE()` para timestamps
-- Use `INSERTED` para novos dados e `DELETED` para dados antigos
-- Crie tabelas de auditoria/log para rastrear mudanças
+Crie um trigger `AFTER INSERT` na tabela `Cliente` que verifique se já existe outro cliente cadastrado com o mesmo `Cpf`. Use `IF EXISTS` consultando a tabela `Cliente` com o `Cpf` de `inserted`. Se houver duplicidade, execute `ROLLBACK` e lance um erro informando o CPF duplicado na mensagem.
 
-⚠️ **Cuidados:**
-- Triggers recursivos podem causar problemas - use `SET RECURSIVE_TRIGGERS OFF`
-- Não use SELECT * em triggers, seja específico
-- Sempre teste triggers em ambiente de desenvolvimento
-- Triggers muito complexos podem impactar performance
+---
 
-Deseja que eu revele as respostas completas para alguma questão específica? 🎯
+**Questão 15 — AFTER UPDATE em múltiplas linhas**
+> Recurso: `inserted`, `deleted`, `CURSOR` ou `JOIN entre inserted e deleted`
+
+Crie um trigger `AFTER UPDATE` na tabela `Produto` que funcione corretamente para atualizações em lote (múltiplas linhas). Para cada produto atualizado, registre na tabela `HistoricoPreco` o preço anterior e o novo preço. Resolva sem usar `CURSOR`, fazendo um `INSERT ... SELECT` com `JOIN` entre `inserted` e `deleted` pelo `Id`.
+
+---
+
+**Questão 16 — AFTER INSERT calculando total automaticamente**
+> Recurso: `inserted`, `UPDATE` (DML dentro do trigger)
+
+Crie um trigger `AFTER INSERT` na tabela `VendaProduto` que, após cada item inserido, recalcule e atualize o campo `ValorTotal` na tabela `Venda` somando o `Preco` de cada produto multiplicado pela `Quantidade` de todos os itens daquela venda. Use o `IdVenda` de `inserted` para filtrar.
+
+---
+
+**Questão 17 — AFTER DELETE protegendo exclusão de registros ativos**
+> Recurso: `deleted`, `IF EXISTS`, `ROLLBACK TRANSACTION`, `RAISERROR`
+
+Crie um trigger `AFTER DELETE` na tabela `Funcionario` que impeça a exclusão caso o funcionário possua agendamentos futuros na tabela `Agendamento` (onde `DataHoraAgendado > GETDATE()`). Se houver agendamentos, execute `ROLLBACK` e informe: `'Funcionário possui agendamentos futuros e não pode ser excluído'`.
+
+---
+
+**Questão 18 — AFTER UPDATE com histórico versionado**
+> Recurso: `inserted`, `deleted`, `GETDATE()`, `SYSTEM_USER`
+
+Crie um trigger `AFTER UPDATE` na tabela `TipoServico` que registre em uma tabela `HistoricoTipoServico` cada versão anterior do registro alterado, guardando todos os campos antes da mudança (via `deleted`), além do usuário que fez a alteração (`SYSTEM_USER`) e a data (`GETDATE()`). O objetivo é manter um histórico completo de todas as versões anteriores.
+
+---
+
+**Questão 19 — INSTEAD OF INSERT com regra de negócio complexa**
+> Recurso: `inserted`, `IF`, `THROW`, `INSTEAD OF`
+
+Crie um trigger `INSTEAD OF INSERT` na tabela `Agendamento` que valide, antes de confirmar a inserção, se o funcionário informado já possui outro agendamento no mesmo horário na tabela `Agendamento`. Se houver conflito de horário, lance um erro com `THROW` informando o conflito. Se não houver, realize o `INSERT` normalmente dentro do próprio trigger.
+
+---
+
+**Questão 20 — AFTER INSERT + AFTER UPDATE com trigger unificado**
+> Recurso: `inserted`, `deleted`, `IF EXISTS`, `TRIGGER_NESTLEVEL()`, `SYSTEM_USER`, `GETDATE()`
+
+Crie um único trigger na tabela `Pagamento` que responda tanto ao `INSERT` quanto ao `UPDATE`. Dentro do trigger, identifique qual operação ocorreu verificando se `deleted` contém linhas (`IF EXISTS (SELECT 1 FROM deleted)`): se não contiver, é um INSERT; se contiver, é um UPDATE. Para cada caso, registre em uma tabela `AuditoriaPagamento` a operação realizada, o usuário, a data e o valor envolvido. Use `TRIGGER_NESTLEVEL()` para evitar execuções recursivas.
+
+---
+
