@@ -281,15 +281,31 @@ SELECT  fu.Nome AS Funcinario,
 		JOIN [dbo].[TipoServico] as ts
 			ON ts.Id = fe.IdTipoServico;
 
-SELECT * FROM TipoServico;
-SELECT * FROM Funcionario;
 
 -- 36. Liste os produtos e seus fornecedores.
 
+SELECT	pr.Nome AS Produtos,
+		fo.Nome AS Fornecedor
+	FROM [dbo].[Produto] as pr
+		JOIN [dbo].[Fornecedor] as fo
+			ON fo.Id = pr.IdFornecedor;
+
 -- 37. Liste todos os fornecedores e os produtos que eles fornecem.
+
+SELECT	fo.Nome AS Fornecedor,
+		pr.Nome AS Produto
+	FROM [dbo].[ProdutoFornecedor] as pf
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = pf.IdProduto
+		JOIN [dbo].[Fornecedor] as fo
+			ON fo.Id = pf.IdFornecedor;
 
 -- 38. Liste os produtos que possuem mais de um fornecedor.
 
+SELECT	pr.Nome AS Produto
+
+SELECT * FROM Fornecedor;
+SELECT * FROM Funcionario;
 -- 39. Liste os históricos de vacinação com o nome do animal e o nome do cliente.
 
 -- 40. Liste as alergias de cada animal com o nome do animal e do dono.
