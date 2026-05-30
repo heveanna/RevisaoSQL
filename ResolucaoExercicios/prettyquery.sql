@@ -302,22 +302,58 @@ SELECT	fo.Nome AS Fornecedor,
 
 -- 38. Liste os produtos que possuem mais de um fornecedor.
 
-SELECT	pr.Nome AS Produto
-
+SELECT	pr.Nome AS Produto,
+		fo.Nome AS Fornecedor,
+	FROM [dbo].[Pr]
+		
 SELECT * FROM Fornecedor;
 SELECT * FROM Funcionario;
+
 -- 39. Liste os históricos de vacinação com o nome do animal e o nome do cliente.
 
+SELECT  hv.NomeVacina AS Vacina,
+		hv.DataAplicacao AS 'Data Aplicação',
+		an.Nome AS Animal,
+		cl.Nome AS Cliente
+	FROM [dbo].[HistoricoVacina] as hv
+		JOIN [dbo].[Animal] as an
+			ON an.Id = hv.IdAnimal 
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = hv.Id
+
 -- 40. Liste as alergias de cada animal com o nome do animal e do dono.
+
+SELECT	ale.Descricao AS Alergia,
+		ani.Nome AS Animal,
+		cli.Nome AS Cliente
+	FROM [dbo].[AnimalAlergia] as ale
+		LEFT JOIN [dbo].[Animal] as ani
+			ON ani.Id = ale.IdAnimal
+		LEFT JOIN [dbo].[Cliente] as cli
+			ON cli.Id = ale.Id;
+
+SELECT * FROM Animal;
+SELECT * FROM Cliente;
 
 -- 3. JOINs com filtros
 -- 41. Liste os animais da espécie `"Cachorro"`.
 
--- 42. Liste os animais da raça `"Poodle"`.
-
--- 43. Liste os clientes que possuem animais da espécie `"Gato"`.
+SELECT	an.Nome AS Animal,
+		ra.Nome AS Raca,
+		es.Nome AS Especie 
+	FROM [dbo].[Raca] as ra
+		JOIN [dbo].[Animal] as an
+			ON an.IdRaca = ra.Id
+		JOIN [dbo].[Especie] as es
+			ON es.Id = ra.IdEspecie
+	WHERE es.Nome LIKE 'Cachorro%'
 
 -- 44. Liste os produtos da categoria `"Medicamento"`.
+
+SELECT	pr.Nome AS Produto,
+		cp.Nome AS Categoria
+	FROM [dbo].[CategoriaProduto] as cp
+		JOIN 
 
 -- 45. Liste as vendas feitas por um cliente específico.
 
