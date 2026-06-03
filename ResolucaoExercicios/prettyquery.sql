@@ -303,8 +303,8 @@ SELECT	fo.Nome AS Fornecedor,
 -- 38. Liste os produtos que possuem mais de um fornecedor.
 
 SELECT	pr.Nome AS Produto,
-		fo.Nome AS Fornecedor,
-	FROM [dbo].[Pr]
+		fo.Nome AS Fornecedor
+	FROM [dbo].[Produto] as pr
 		
 SELECT * FROM Fornecedor;
 SELECT * FROM Funcionario;
@@ -332,8 +332,6 @@ SELECT	ale.Descricao AS Alergia,
 		LEFT JOIN [dbo].[Cliente] as cli
 			ON cli.Id = ale.Id;
 
-SELECT * FROM Animal;
-SELECT * FROM Cliente;
 
 -- 3. JOINs com filtros
 -- 41. Liste os animais da espécie `"Cachorro"`.
@@ -353,15 +351,59 @@ SELECT	an.Nome AS Animal,
 SELECT	pr.Nome AS Produto,
 		cp.Nome AS Categoria
 	FROM [dbo].[CategoriaProduto] as cp
-		JOIN 
+		JOIN [dbo].[Produto] as pr
+			ON pr.IdCategoriaProduto = cp.Id
+	WHERE cp.Nome LIKE 'Medicamento';
 
 -- 45. Liste as vendas feitas por um cliente específico.
 
+SELECT	cl.Nome AS Cliente,
+		FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS Valor,
+		ve.StatusVenda AS 'Status da Venda'
+	FROM [dbo].[Cliente] as cl
+		JOIN [dbo].[Venda] as ve
+			ON ve.IdCliente = cl.Id
+	WHERE cl.Nome LIKE 'Ana Rocha';
+
 -- 46. Liste todos os pagamentos feitos com cartão de crédito.
+
+SELECT	FORMAT(pa.Valor, 'C', 'Pt-Br') AS Pagamento,
+		tp.Nome AS 'Tipo Pagamento'
+	FROM [dbo].[Pagamento] as pa
+		JOIN [dbo].[TipoPagamento] as tp
+			ON tp.Id = pa.IdTipoPagamento
+	WHERE tp.Nome LIKE '%Cartao de Credito%';		
 
 -- 47. Liste os agendamentos de um funcionário específico.
 
+SELECT	fu.Nome AS Funcionario,
+		ag.StatusAgendamento AS Agendamento,
+		ag.DataHoraAgendado
+	FROM [dbo].[Agendamento] as ag
+		JOIN [dbo].[Funcionario] as fu
+			ON fu.Id = ag.IdFuncionario
+	WHERE fu.Nome LIKE 'Carla Mendes';	
+
 -- 48. Liste os agendamentos de uma data específica mostrando cliente, animal e serviço.
+
+DECLARE @Ano INT = 2023;
+DECLARE @Mes INT = 09;
+
+SELECT	cl.Nome AS Cliente,
+		an.Nome AS Animal,
+		tp.Nome AS Servico,
+		ag.DataHoraRealizado AS Data
+	FROM [dbo].[Agendamento] as ag
+		JOIN [dbo].[TipoServico] as tp
+			ON tp.Id = ag.IdTipoServico
+		JOIN [dbo].[Animal] as an
+			ON an.Id = ag.IdAnimal
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = an.IdCliente
+	WHERE ag.DataHoraRealizado LIKE '%2023-12-13 15:00:00.000%';
+
+SELECT * FROM Funcionario;
+SELECT * FROM Agendamento;
 
 -- 49. Liste as vacinas aplicadas em animais de um cliente específico.
 
