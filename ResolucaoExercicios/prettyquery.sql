@@ -302,12 +302,16 @@ SELECT	fo.Nome AS Fornecedor,
 
 -- 38. Liste os produtos que possuem mais de um fornecedor.
 
-SELECT	pr.Nome AS Produto,
-		fo.Nome AS Fornecedor
-	FROM [dbo].[Produto] as pr
-		
-SELECT * FROM Fornecedor;
-SELECT * FROM Funcionario;
+SELECT	pr.Id,
+		pr.Nome AS Produto,
+		COUNT(fo.Nome) AS Fornecedor
+	FROM [dbo].[ProdutoFornecedor] as pf
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = pf.IdProduto
+		JOIN [dbo].[Fornecedor] as fo
+			ON fo.Id = pr.IdFornecedor
+	GROUP BY pr.Id, pr.Nome
+	HAVING COUNT(fo.Nome) > 1;
 
 -- 39. Liste os históricos de vacinação com o nome do animal e o nome do cliente.
 
@@ -331,7 +335,6 @@ SELECT	ale.Descricao AS Alergia,
 			ON ani.Id = ale.IdAnimal
 		LEFT JOIN [dbo].[Cliente] as cli
 			ON cli.Id = ale.Id;
-
 
 -- 3. JOINs com filtros
 -- 41. Liste os animais da espécie `"Cachorro"`.
@@ -386,8 +389,7 @@ SELECT	fu.Nome AS Funcionario,
 
 -- 48. Liste os agendamentos de uma data específica mostrando cliente, animal e serviço.
 
-DECLARE @Ano INT = 2023;
-DECLARE @Mes INT = 09;
+DECLARE @DATA DATE = '2023-01-05';
 
 SELECT	cl.Nome AS Cliente,
 		an.Nome AS Animal,
@@ -400,19 +402,58 @@ SELECT	cl.Nome AS Cliente,
 			ON an.Id = ag.IdAnimal
 		JOIN [dbo].[Cliente] as cl
 			ON cl.Id = an.IdCliente
-	WHERE ag.DataHoraRealizado LIKE '%2023-12-13 15:00:00.000%';
-
-SELECT * FROM Funcionario;
-SELECT * FROM Agendamento;
+	WHERE  CAST(ag.DataHoraRealizado AS DATE) = @DATA; 
 
 -- 49. Liste as vacinas aplicadas em animais de um cliente específico.
 
+SELECT  cl.Nome AS Cliente, 
+		an.Nome AS Animal,
+		hv.NomeVacina AS Vacina
+	FROM [dbo].[HistoricoVacina] as hv
+		JOIN [dbo].[Animal] as an
+			ON an.Id = hv.IdAnimal
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = an.IdCliente
+	WHERE cl.Nome LIKE 'Ana Rocha';
+
 -- 50. Liste os produtos vendidos em vendas acima de R$ 200,00.
+
+SELECT	pr.Nome AS Produto,
+		ve.StatusVenda AS Venda,
+		FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS Valor
+	FROM [dbo].[VendaProduto] as vp
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vp.IdVenda
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = vp.IdProduto
+	WHERE ve.ValorTotal > 200 AND ve.StatusVenda LIKE 'Paga';
 
 -- 51. Liste os serviços vendidos para animais da espécie `"Cachorro"`.
 
+SELECT	an.Nome AS Animal, 
+		es.Nome AS Especie,
+		ts.Nome AS Servico
+	FROM [dbo].[Raca] as ra
+		JOIN [dbo].[Especie] as es 
+			ON es.Id = ra.IdEspecie
+		JOIN [dbo].[Animal] as an
+			ON an.Id = ra.Id
+		JOIN [dbo].[TipoServico] as ts
+			ON ts.Id = an.Id
+	WHERE es.Nome LIKE 'Cachorro';
+
 -- 52. Liste os fornecedores que fornecem produtos da categoria `"Ração"`.
 
+SELECT	fo.Nome AS Fornecedores,
+		pr.Nome AS Produto,
+
+		
+
+SELECT * FROM Animal;
+SELECT * FROM Especie;
+SELECT * FROM Raca;
+SELECT * FROM Fornecedor;
+SELECT * FROM Funcionario;
 -- 53. Liste os funcionários especializados em `"Banho e Tosa"`.
 
 -- 54. Liste as vendas de produto feitas em determinado mês.
