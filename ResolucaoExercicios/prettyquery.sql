@@ -281,7 +281,6 @@ SELECT  fu.Nome AS Funcinario,
 		JOIN [dbo].[TipoServico] as ts
 			ON ts.Id = fe.IdTipoServico;
 
-
 -- 36. Liste os produtos e seus fornecedores.
 
 SELECT	pr.Nome AS Produtos,
@@ -444,31 +443,88 @@ SELECT	an.Nome AS Animal,
 
 -- 52. Liste os fornecedores que fornecem produtos da categoria `"Ração"`.
 
-SELECT	fo.Nome AS Fornecedores,
+SELECT	fo.Nome AS Fornecedor,
 		pr.Nome AS Produto,
+		cp.Nome AS 'Categoria'
+	FROM [dbo].[CategoriaProduto] as cp
+		JOIN [dbo].[Produto] as pr
+			ON pr.IdCategoriaProduto = cp.Id
+		JOIN [dbo].[Fornecedor] as fo
+			ON fo.Id = pr.IdFornecedor
+	WHERE cp.Nome LIKE 'Racao%';	
 
-		
-
-SELECT * FROM Animal;
-SELECT * FROM Especie;
-SELECT * FROM Raca;
-SELECT * FROM Fornecedor;
-SELECT * FROM Funcionario;
 -- 53. Liste os funcionários especializados em `"Banho e Tosa"`.
+
+SELECT	fuc.Nome AS Funcionario,
+		tps.Nome AS Servico
+	FROM [dbo].[FuncionarioEspecialidade] as fes
+		JOIN [dbo].[Funcionario] as fuc
+			ON fuc.Id = fes.IdFuncionario
+		JOIN [dbo].[TipoServico] as tps
+			ON tps.Id = fes.IdTipoServico
+	WHERE tps.Nome LIKE 'Banho e Tosa%'
+	ORDER BY fuc.Nome ASC;
 
 -- 54. Liste as vendas de produto feitas em determinado mês.
 
+DECLARE @MESES INT = 03;
+
+SELECT	pr.Nome AS Produto,
+		ve.ValorTotal AS Venda,
+		ve.DataHora AS Data
+	FROM [dbo].[VendaProduto] as vp
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = vp.IdProduto
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vp.IdVenda
+	WHERE MONTH ve.DataHora = @MESES;
+
+SELECT * FROM TipoServico;
+SELECT * FROM Especie;
+
 -- 55. Liste os clientes que compraram determinado produto.
 
+SELECT	cl.Id,
+		cl.Nome AS Cliente, 
+		pr.Nome AS Produto,
+		vp.Quantidade
+	FROM [dbo].[VendaProduto] as vp WITH(NOLOCK)
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = vp.IdProduto
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vp.IdVenda
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = ve.IdCliente
+	WHERE pr.Nome LIKE 'Racao Premium Adulto 15kg'
+		
 -- 56. Liste os animais que possuem alergias cadastradas.
+
+SELECT	ani.Nome AS Animal,	
+		ale.Descricao AS Alergia
+	FROM [dbo].[AnimalAlergia] as ale
+		JOIN [dbo].[Animal] as ani 
+			ON ani.Id = ale.IdAnimal;
 
 -- 57. Liste os animais que não possuem alergias cadastradas.
 
+SELECT	ani.Nome AS Animal,	
+		ale.Descricao AS Alergia
+	FROM [dbo].[AnimalAlergia] as ale
+		RIGHT JOIN [dbo].[Animal] as ani 
+			ON ani.Id = ale.IdAnimal;
+
 -- 58. Liste os produtos que nunca foram vendidos.
 
+SELECT	pr.Nome AS Produto,
+		ve.
+		
+
+SELECT * FROM Animal;
+SELECT * FROM Produto;
+SELECT * FROM Funcionario;
 -- 59. Liste os serviços que nunca foram vendidos.
 
--- 60. Liste os clientes que nunca fizeram uma venda.
+-- 60. Liste os clientes que nunca fizeram uma venda.~
 
 -- ## 4. Agregações com JOIN
 -- 61. Mostre a quantidade de animais por cliente.
