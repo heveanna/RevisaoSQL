@@ -429,16 +429,19 @@ SELECT	pr.Nome AS Produto,
 
 -- 51. Liste os serviços vendidos para animais da espécie `"Cachorro"`.
 
-SELECT	an.Nome AS Animal, 
+SELECT	an.Id,
+		an.Nome AS Animal, 
 		es.Nome AS Especie,
 		ts.Nome AS Servico
-	FROM [dbo].[Raca] as ra
-		JOIN [dbo].[Especie] as es 
-			ON es.Id = ra.IdEspecie
+	FROM [dbo].[VendaServico] as ves
 		JOIN [dbo].[Animal] as an
-			ON an.Id = ra.Id
+			ON an.Id = ves.IdAnimal
 		JOIN [dbo].[TipoServico] as ts
-			ON ts.Id = an.Id
+			ON ts.Id = ves.IdTipoServico
+		JOIN [dbo].[Raca] as ra
+			ON ra.Id = an.IdRaca
+		JOIN [dbo].[Especie] as es
+			ON es.Id = ra.IdEspecie
 	WHERE es.Nome LIKE 'Cachorro';
 
 -- 52. Liste os fornecedores que fornecem produtos da categoria `"Ração"`.
@@ -470,17 +473,14 @@ SELECT	fuc.Nome AS Funcionario,
 DECLARE @MESES INT = 03;
 
 SELECT	pr.Nome AS Produto,
-		ve.ValorTotal AS Venda,
+		FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS Venda,
 		ve.DataHora AS Data
 	FROM [dbo].[VendaProduto] as vp
 		JOIN [dbo].[Produto] as pr
 			ON pr.Id = vp.IdProduto
 		JOIN [dbo].[Venda] as ve
 			ON ve.Id = vp.IdVenda
-	WHERE MONTH ve.DataHora = @MESES;
-
-SELECT * FROM TipoServico;
-SELECT * FROM Especie;
+	WHERE MONTH(ve.DataHora) = @MESES;
 
 -- 55. Liste os clientes que compraram determinado produto.
 
@@ -515,30 +515,92 @@ SELECT	ani.Nome AS Animal,
 
 -- 58. Liste os produtos que nunca foram vendidos.
 
-SELECT	pr.Nome AS Produto,
-		ve.
-		
+SELECT	pro.Nome AS Produto,
+		ven.StatusVenda AS 'Venda não realizada'
+	FROM [dbo].[VendaProduto] as vpr
+		JOIN [dbo].[Produto] as pro
+			ON pro.Id = vpr.IdProduto
+		JOIN [dbo].[Venda] as ven
+			ON ven.Id = vpr.IdVenda
+	WHERE ven.StatusVenda LIKE 'Cancelada'
 
-SELECT * FROM Animal;
-SELECT * FROM Produto;
-SELECT * FROM Funcionario;
 -- 59. Liste os serviços que nunca foram vendidos.
 
--- 60. Liste os clientes que nunca fizeram uma venda.~
+SELECT	tps.Nome AS Servico,
+		ven.StatusVenda AS 'Nunca vendidos'
+	FROM [dbo].[VendaServico] as ves
+		JOIN [dbo].[TipoServico] as tps
+			ON tps.Id = ves.IdTipoServico
+		JOIN [dbo].[Venda] as ven
+			ON ven.Id = ves.IdVenda
+	WHERE ven.StatusVenda LIKE 'Cancelada'
+
+-- 60. Liste os clientes que nunca fizeram uma venda.
+
+SELECT	cl.Id,
+		cl.Nome AS Cliente,
+		ve.StatusVenda AS 'Nenhuma venda'
+	FROM [dbo].[Venda] as ve
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = ve.IdCliente
+	WHERE ve.StatusVenda LIKE 'Cancelada'
 
 -- ## 4. Agregações com JOIN
 -- 61. Mostre a quantidade de animais por cliente.
 
+SELECT	cl.Id,
+		cl.Nome AS Cliente,
+		COUNT(an.Nome) AS Animal
+	FROM [dbo].[Animal] as an
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = an.IdCliente
+	GROUP BY cl.Id, cl.Nome;
+
 -- 62. Mostre a quantidade de animais por espécie.
+
+SELECT	es.Id,
+		es.Nome AS Especie,
+		COUNT(an.Nome) AS Animal
+	FROM [dbo].[Animal] as an
+		JOIN [dbo].[Raca] as ra
+			ON ra.Id = an.IdRaca
+		JOIN [dbo].[Especie] as es
+			ON es.Id = ra.IdEspecie
+	GROUP BY es.Nome, es.Id;
 
 -- 63. Mostre a quantidade de animais por raça.
 
+SELECT	ra.Nome AS Raca,
+		COUNT(an.Nome) AS Animal
+	FROM [dbo].[Animal] as an
+		JOIN [dbo].[Raca] as ra 
+			ON ra.Id = an.IdRaca
+	GROUP BY ra.Nome;
+
 -- 64. Mostre a quantidade de produtos por categoria.
+
+SELECT	cpr.Id,
+		cpr.Nome AS 'Categoria produto',
+		COUNT(pro.Nome) AS Produto
+	FROM [dbo].[Produto] as pro
+		JOIN [dbo].[CategoriaProduto] as cpr
+			ON cpr.Id = pro.IdCategoriaProduto
+	GROUP BY cpr.Id, cpr.Nome;
 
 -- 65. Mostre o total vendido por venda.
 
+SELECT	ven.StatusVenda AS 'Status Venda',
+		FORMAT(SUM(ven.ValorTotal), 'C', 'Pt-Br') AS Total
+	FROM [dbo].[Venda] as ven
+	GROUP BY ven.StatusVenda
+
 -- 66. Mostre o total gasto por cada cliente.
 
+SELECT 
+
+
+SELECT * FROM Venda;
+SELECT * FROM Animal;
 -- 67. Mostre a quantidade de vendas por cliente.
 
 -- 68. Mostre a quantidade de produtos vendidos por produto.
