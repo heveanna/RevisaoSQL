@@ -596,35 +596,165 @@ SELECT	ven.StatusVenda AS 'Status Venda',
 
 -- 66. Mostre o total gasto por cada cliente.
 
-SELECT 
+SELECT	cl.Id,
+		cl.Nome AS Cliente,
+		FORMAT(SUM(ve.ValorTotal), 'C', 'Pt-Br') AS Valor
+	FROM [dbo].[Venda] as ve
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = ve.IdCliente
+	GROUP BY cl.Id, cl.Nome;
 
-
-SELECT * FROM Venda;
-SELECT * FROM Animal;
 -- 67. Mostre a quantidade de vendas por cliente.
+
+SELECT	cl.Id,
+		cl.Nome AS Cliente,
+		COUNT(vep.Quantidade) AS Qtd
+	FROM [dbo].[VendaProduto] as vep
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vep.IdVenda
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = ve.IdCliente
+	GROUP BY  cl.Id, cl.Nome;
 
 -- 68. Mostre a quantidade de produtos vendidos por produto.
 
+SELECT	pr.Id,
+		pr.Nome AS Produto,
+		ve.StatusVenda AS Venda,
+		COUNT(ve.StatusVenda) AS 'Qtd. Produto'
+	FROM [dbo].[VendaProduto] vep
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vep.IdVenda
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = vep.IdProduto
+	WHERE ve.StatusVenda LIKE 'Paga'
+	GROUP BY pr.Id, pr.Nome, ve.StatusVenda
+
 -- 69. Mostre o faturamento total por produto.
+
+SELECT	pr.Id,
+		pr.Nome AS Produto,
+		FORMAT(SUM(ve.ValorTotal), 'C', 'Pt-Br') AS 'Faturamento Total'
+	FROM [dbo].[VendaProduto] as vep
+		JOIN [dbo].[Venda] as ve
+			ON ve.Id = vep.IdVenda
+		JOIN [dbo].[Produto] as pr
+			ON pr.Id = vep.IdProduto
+	GROUP BY pr.Id, pr.Nome;
 
 -- 70. Mostre o faturamento total por serviço.
 
+SELECT	tps.Id,
+		tps.Nome AS Servico,
+		FORMAT(SUM(ve.ValorTotal), 'C', 'Pt-Br') AS 'Faturamento Total'
+	FROM [dbo].[VendaServico] as ves
+		JOIN [dbo].[Venda] as ve 
+			ON ve.Id = ves.IdVenda
+		JOIN [dbo].[TipoServico] as tps
+			ON tps.Id = ves.IdTipoServico 
+	GROUP BY tps.Id, tps.Nome;
+
 -- 71. Mostre a quantidade de agendamentos por funcionário.
 
+SELECT	fun.Id,
+		fun.Nome AS Nome,
+		COUNT(age.StatusAgendamento) AS Agendamentos
+	FROM [dbo].[Agendamento] as age
+		JOIN [dbo].[Funcionario] as fun
+			ON fun.Id = age.IdFuncionario
+	GROUP BY fun.Id, fun.Nome;
+		
 -- 72. Mostre a quantidade de agendamentos por status.
+
+SELECT	age.StatusAgendamento AS Agendamento,
+		COUNT(age.StatusAgendamento) AS 'Qtd. Agendamentos'
+	FROM [dbo].[Agendamento] as age
+	GROUP BY age.StatusAgendamento;
 
 -- 73. Mostre a quantidade de pagamentos por tipo de pagamento.
 
+SELECT	tpg.Nome AS 'Tipo de pagamento',
+		COUNT(pag.Valor) AS Pagamentos
+	FROM [dbo].[Pagamento] as pag
+		JOIN [dbo].[TipoPagamento] as tpg
+			ON tpg.Id = pag.IdTipoPagamento
+	GROUP BY tpg.Nome;
+
 -- 74. Mostre o valor total recebido por tipo de pagamento.
+
+SELECT	tpg.Nome AS 'Tipo de pagamento',
+		FORMAT(SUM(pag.Valor), 'C', 'Pt-Br') AS 'Valor total'
+	FROM [dbo].[Pagamento] as pag
+		JOIN [dbo].[TipoPagamento] as tpg
+			ON tpg.Id = pag.IdTipoPagamento
+	GROUP BY tpg.Nome;
 
 -- 75. Mostre o total de vacinas aplicadas por animal.
 
+SELECT	ani.Id,
+		ani.Nome AS Animal,
+		COUNT(htv.NomeVacina) AS 'Total de vacinas'
+	FROM [dbo].[HistoricoVacina] as htv
+		JOIN [dbo].[Animal] as ani
+			ON ani.Id = htv.IdAnimal
+	GROUP BY ani.Id, ani.Nome;
+
 -- 76. Mostre o total de vacinas aplicadas por espécie.
 
+SELECT	es.Nome AS Especie,
+		COUNT(htv.NomeVacina) AS 'Tota Vacina aplicada'
+	FROM [dbo].[Animal] as an
+		JOIN [dbo].[HistoricoVacina] as htv
+			ON htv.IdAnimal = an.Id
+		JOIN [dbo].[Raca] as ra
+			ON ra.Id = an.IdRaca
+		JOIN [dbo].[Especie] as es
+			ON es.Id = ra.IdEspecie
+	GROUP BY es.Nome;
+	
 -- 77. Mostre os clientes com mais de 2 animais.
+
+SELECT	cl.Id,
+		cl.Nome AS Cliente,
+		COUNT(an.Nome) AS Animal
+	FROM [dbo].[Animal] as an
+		JOIN [dbo].[Cliente] as cl
+			ON cl.Id = an.IdCliente
+	GROUP BY cl.Id, cl.Nome
+	HAVING COUNT(an.Nome) > 1;
 
 -- 78. Mostre os produtos que venderam mais de 10 unidades.
 
+SELECT	pro.Id,
+		pro.Nome AS Produto,
+		COUNT(vpr.Quantidade) AS 'Qtd. que venderam'
+	FROM [dbo].[VendaProduto] as vpr
+		JOIN [dbo].[Produto] as pro
+			ON pro.Id = vpr.IdProduto
+	GROUP BY pro.Id, pro.Nome
+	HAVING COUNT(vpr.Quantidade) > 10;
+
 -- 79. Mostre os funcionários com mais de 5 agendamentos.
 
+SELECT	fun.Id,
+		fun.Nome AS Funcionario,
+		age.StatusAgendamento AS Agendamento,
+		COUNT(age.StatusAgendamento) AS Agendamento
+	FROM [dbo].[Agendamento] as age WITH(NOLOCK)
+		JOIN [dbo].[Funcionario] as fun
+			ON fun.Id = age.IdFuncionario
+	WHERE age.StatusAgendamento LIKE 'Concluido'
+	GROUP BY fun.Id, fun.Nome, age.StatusAgendamento
+	HAVING COUNT(age.StatusAgendamento) > 5
+
 -- 80. Mostre as categorias de produto com mais de 3 produtos cadastrados.
+
+SELECT	ctp.Id,
+		ctp.Nome AS 'Categoria de Produto',
+		COUNT(pr.Nome) AS Produto
+	FROM [dbo].[Produto] as pr
+		JOIN [dbo].[CategoriaProduto] as ctp 
+			ON ctp.Id = pr.IdCategoriaProduto
+	GROUP BY ctp.Id, ctp.Nome
+	HAVING COUNT(pr.Nome) > 3;
+		
