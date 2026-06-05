@@ -3,14 +3,60 @@ USE PetShop;
 -- ## 5. Subselects simples
 -- 81. Liste os clientes que possuem pelo menos um animal cadastrado.
 
-SELECT 
-
+SELECT  cl.Id,
+        cl.Nome AS Cliente,
+         (
+            SELECT COUNT(an.Id)
+                FROM [dbo].[Animal] AS an
+                WHERE an.IdCliente = cl.Id
+            ) AS Animal
+    FROM [dbo].[Cliente] AS cl
+    WHERE (
+            SELECT COUNT(an.Id)
+                FROM [dbo].[Animal] AS an
+                WHERE an.IdCliente = cl.Id
+            ) > 0;
+		
 -- 82. Liste os clientes que não possuem animais cadastrados.
+
+SELECT  cl.Id,
+        cl.Nome AS Cliente
+    FROM [dbo].[Cliente] as cl
+    WHERE NOT EXISTS (SELECT 1
+                    FROM [dbo].[Animal] as an
+                    WHERE an.IdCliente = cl.Id
+           );
 
 -- 83. Liste os animais que possuem alergia cadastrada.
 
+SELECT  an.Id,
+        an.Nome AS Animal,
+         (SELECT STRING_AGG(anl.Descricao, ', ') -- Mostra o animal apenas uma vez e colocar as alergia na mesma coluna
+            FROM [dbo].[AnimalAlergia] AS anl
+                WHERE anl.IdAnimal = an.Id
+            ) AS Alergia
+    FROM [dbo].[Animal] as an
+        WHERE EXISTS (
+            SELECT 1
+                FROM [dbo].[AnimalAlergia] as anl
+                WHERE anl.IdAnimal = an.Id
+                    );
+
 -- 84. Liste os animais que nunca foram vacinados.
 
+SELECT  an.Id,
+        an.Nome AS Animal,
+        (SELECT hrv.NomeVacina
+            FROM [dbo].[HistoricoVacina] as hrv
+               WHERE hrv.IdAnimal = an.Id
+         ) AS 'Não Vacinados'
+    FROM [dbo].[Animal] as an
+        WHERE NOT EXISTS (
+            SELECT 1 
+                FROM [dbo].[HistoricoVacina] as hrv
+                WHERE hrv.IdAnimal = an.Id
+               );
+    
 -- 85. Liste os produtos que já foram vendidos.
 
 -- 86. Liste os produtos que nunca foram vendidos.
@@ -26,9 +72,28 @@ SELECT
 -- ## 6. Subselects com comparação
 -- 91. Liste os produtos com preço maior que a média dos produtos.
 
+SELECT  pr.Nome AS Produto,
+        FORMAT(pr.Preco, 'C', 'Pt-Br') AS 'Média Preço'
+    FROM [dbo].[Produto] as pr
+    WHERE pr.Preco > (
+        SELECT AVG(Preco)
+        FROM Produto 
+    );
+
 -- 92. Liste os produtos com preço menor que a média dos produtos.
 
+SELECT  pr.Nome AS Produto,
+        FORMAT(pr.Preco, 'C', 'Pt-Br') AS 'Média Preço'
+    FROM [dbo].[Produto] as pr
+    WHERE pr.Preco < (
+        SELECT AVG(Preco)
+        FROM Produto 
+    );
+
 -- 93. Liste os clientes que gastaram mais que a média geral de gasto dos clientes.
+
+SELECT  cl.Nome AS Cliente,
+        
 
 -- 94. Liste as vendas com valor maior que a média das vendas.
 
