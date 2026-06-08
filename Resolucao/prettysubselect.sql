@@ -93,6 +93,8 @@ SELECT  pr.Nome AS Produto,
 -- 93. Liste os clientes que gastaram mais que a média geral de gasto dos clientes.
 
 SELECT  cl.Nome AS Cliente,
+        AVG(pr.Preco) AS Preco
+    FROM [dbo].[Cliente] as Cliente 
         
 
 -- 94. Liste as vendas com valor maior que a média das vendas.
