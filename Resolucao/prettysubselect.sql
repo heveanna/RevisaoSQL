@@ -93,13 +93,34 @@ SELECT  pr.Nome AS Produto,
 -- 93. Liste os clientes que gastaram mais que a média geral de gasto dos clientes.
 
 SELECT  cl.Nome AS Cliente,
-        AVG(pr.Preco) AS Preco
-    FROM [dbo].[Cliente] as Cliente 
-        
+        pr.Preco AS Preco
+    FROM [dbo].[VendaProduto] as vpr
+        JOIN [dbo].[Produto] as pr
+            ON pr.Id = vpr.IdProduto
+        JOIN [dbo].[Cliente] as cl
+               ON cl.Id = vpr.Id
+    WHERE pr.Preco > (
+        SELECT AVG(Preco)
+        FROM Produto
+    );
 
 -- 94. Liste as vendas com valor maior que a média das vendas.
 
+SELECT  FORMAT(ve.ValorTotal, 'C', 'Pt-Br') AS Venda
+    FROM [dbo].[VendaProduto] as vpr
+        JOIN [dbo].[Venda] as ve
+            ON ve.Id = vpr.IdVenda
+    WHERE ve.ValorTotal > (
+        SELECT AVG(ValorTotal)
+        FROM Venda);
+
 -- 95. Liste os produtos com estoque acima da média.
+
+SELECT  vpr.Quantidade AS Estoque
+    FROM [VendaProduto] as vpr 
+    WHERE vpr.Quantidade > (
+        SELECT AVG(vpr.Quantidade)
+        FROM VendaProduto);
 
 -- 96. Liste os produtos com estoque abaixo da média.
 
